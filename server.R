@@ -35,12 +35,12 @@ shinyServer(function(input, output) {
          cex.lab = 1.4, cex.main = 1.5, ylim = c(0, 1))
     
     pow <- icpower(HR = 1.25, 
-                   sensitivity = input$sen, 
-                   specificity = input$spe, 
+                   sensitivity = input$sen2, 
+                   specificity = input$spe2, 
                    survivals, 
                    Nlist)$result
     lines(pow$N, pow$power, lwd = 2)
-    legend("topleft", cex = 1.25, legend = paste("(", input$sen, ", ", input$spe, ")"), lwd = 1.5)
+    legend("topleft", cex = 1.25, legend = paste("(", input$sen2, ", ", input$spe2, ")"), lwd = 1.5)
   })
  
 })
