@@ -21,7 +21,8 @@ shinyUI(fluidPage(
       
         selectInput("select", "Choose a study you want to conduct",
                     choices = list("Sample Size Estimation" = 1,
-                      "Comparison of power versus total sample size (N)" = 2)),
+                                   "Figure 1. Comparison of power versus total sample size (N) for different values of the (sensitivity, specificity) of the diagnostic test" = 2,
+                                   "Figure 2. Effects of hazard ratio, event rate, and number of tests on sample size for different (sensitivity, specificity)" = 3)),
         
         conditionalPanel(
           condition = "input.select == 1",
@@ -45,6 +46,31 @@ shinyUI(fluidPage(
                       min = 1, max = 20, value = c(1,8)),
           sliderInput("neven", "Noevent:",
                       min = 0, max = 1, value = 0.9)
+        ),
+        
+        conditionalPanel(
+          condition = "input.select == 3",
+          radioButtons("effect", "Effect of",
+                       choices = list("Hazard Ratio" = 1,
+                                      "Cumulative Incidence" = 2,
+                                      "Number of Tests" = 3)),
+          conditionalPanel(
+            condition = "input.effect == 1",
+            sliderInput("HRange", "Hazard Ratio Range:",
+                        min = 1, max = 3, step = 0.05, 
+                        value = c(1.5, 2.5))
+            ),
+          conditionalPanel(
+            condition = "input.effect == 2",
+            sliderInput("nevent", "Noevent:",
+                        min = 0, max = 1, step = 0.05, 
+                        value = c(0.2, 0.9))
+          ),
+          
+          sliderInput("sen3", "Sensitivity:",
+                      min = 0, max = 1, value = 0.55),
+          sliderInput("spe3", "Specificity:",
+                      min = 0, max = 1, value = 0.99)
         )
       ),
 
@@ -59,7 +85,16 @@ shinyUI(fluidPage(
                  ),
                  conditionalPanel(
                    condition = "input.select == 2",
-                   plotOutput("disPlot")
+                   plotOutput("disPlot1")
+                 ),
+                 conditionalPanel(
+                   condition = "input.effect == 1",
+                   plotOutput("disPlot2_1"),
+                   
+                   conditionalPanel(
+                     condition = "input.effect == 2",
+                     plotOutput("disPlot2_2")
+                   )
                  )),
         tabPanel("Tutorial")
       )

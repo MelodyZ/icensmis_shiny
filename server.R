@@ -10,6 +10,7 @@ library(icensmis)
 
 shinyServer(function(input, output) {
   
+  # Sample Size
   output$values <- renderText({
     
     # Calculate Power and Sample Size
@@ -25,9 +26,10 @@ shinyServer(function(input, output) {
 
   })
   
+  #Figure 1
   Nlist <- seq(100, 15000, by = 100)
   
-  output$disPlot <- renderPlot({
+  output$disPlot1 <- renderPlot({
     
     lambda.base <- -log(input$neven)/max(input$tim)
     survivals <- 1 - pexp(input$tim, lambda.base)
@@ -41,6 +43,28 @@ shinyServer(function(input, output) {
                    Nlist)$result
     lines(pow$N, pow$power, lwd = 2)
     legend("topleft", cex = 1.25, legend = paste("(", input$sen2, ", ", input$spe2, ")"), lwd = 1.5)
+  })
+  
+  #Figure 2
+  testtimes <- c(2, 4, 6, 8)
+   ## Sample size as function of hazard ratio
+  output$disPlot2_1 <- renderPlot({
+    noevent <- 0.9
+    survivals <- exp(log(noevent) * testtimes/max(testtimes))
+    HR <- seq(input$HRange[1], input$HRange[2], by = 0.05)
+    ssize <- sapply(HR, function(x) icpower(x, input$sen3, input$spe3, survivals, power = 0.9)$result$N)
+    plot(HR, ssize, type = "n", xlab = "HR", ylab = "Sample Size", main = "(a)")
+    lines(HR, ssize, lwd = 2)
+    legend("topright", cex = 1.25, legend = paste("(", input$sen3, ", ", input$spe3, ")"), lwd = 1.5)
+  })
+   ## Sample size as function of cumulative incidence
+  output$disPlot2_2 <- renderPlot({
+    HR <- 1.25
+    noevent <- seq(input$nevent[1], input$nevent[2], by = 0.05)
+    ssize <- sapply(noevent, function(x) icpower(HR, input$sen3, input$spe3, exp(log(x) * testtimes/max(testtimes)), power = 0.9)$result$N)
+    plot(1 - noevent, ssize, type = "n", xlab = expression(paste("Cumulative incidence (", 1 - S[J + 1], ")")), ylab = "Sample size", main = "(b)", ylim = c(0, 14000), cex.lab = 1.25)
+    lines(1 - noevent, ssize)
+    legend("topright", legend = paste("(", input$sen3, ", ", input$spe3, ")"), lwd = 1.5)
   })
  
 })
