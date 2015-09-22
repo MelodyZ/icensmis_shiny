@@ -66,6 +66,12 @@ shinyUI(fluidPage(
                         min = 0, max = 1, step = 0.05, 
                         value = c(0.2, 0.9))
           ),
+          conditionalPanel(
+            condition = "input.effect == 3",
+            sliderInput("ntest", "Notest:",
+                        min = 1, max = 20, step = 1, 
+                        value = c(2, 10))
+          ),
           
           sliderInput("sen3", "Sensitivity:",
                       min = 0, max = 1, value = 0.55),
@@ -89,6 +95,7 @@ shinyUI(fluidPage(
                  ),
                  conditionalPanel(
                    condition = "input.select == 3",
+                   
                    conditionalPanel(
                      condition = "input.effect == 1",
                      plotOutput("disPlot2_1")
@@ -96,7 +103,11 @@ shinyUI(fluidPage(
                    conditionalPanel(
                      condition = "input.effect == 2",
                      plotOutput("disPlot2_2")
-                     )
+                     ),
+                   conditionalPanel(
+                     condition = "input.effect == 3",
+                     plotOutput("disPlot2_3")
+                   )
                    )
                  )),
         tabPanel("Tutorial")
