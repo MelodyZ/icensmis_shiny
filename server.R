@@ -53,18 +53,19 @@ shinyServer(function(input, output) {
     survivals <- exp(log(noevent) * testtimes/max(testtimes))
     HR <- seq(input$HRange[1], input$HRange[2], by = 0.05)
     ssize <- sapply(HR, function(x) icpower(x, input$sen3, input$spe3, survivals, power = 0.9)$result$N)
-    plot(HR, ssize, type = "n", xlab = "HR", ylab = "Sample Size", main = "(a)")
+    plot(HR, ssize, type = "n", xlim = c(1,3), ylim = c(0, 10000), xlab = "HR", ylab = "Sample Size", main = "(a)")
     lines(HR, ssize, lwd = 2)
     legend("topright", cex = 1.25, legend = paste("(", input$sen3, ", ", input$spe3, ")"), lwd = 1.5)
   })
    ## Sample size as function of cumulative incidence
   output$disPlot2_2 <- renderPlot({
     HR <- 1.25
+    testtimes <- c(2, 4, 6, 8)
     noevent <- seq(input$nevent[1], input$nevent[2], by = 0.05)
     ssize <- sapply(noevent, function(x) icpower(HR, input$sen3, input$spe3, exp(log(x) * testtimes/max(testtimes)), power = 0.9)$result$N)
     plot(1 - noevent, ssize, type = "n", xlab = expression(paste("Cumulative incidence (", 1 - S[J + 1], ")")), ylab = "Sample size", main = "(b)", ylim = c(0, 14000), cex.lab = 1.25)
     lines(1 - noevent, ssize)
-    legend("topright", legend = paste("(", input$sen3, ", ", input$spe3, ")"), lwd = 1.5)
+    legend("topright", legend = paste("(", input$sen3, ", ", input$spe3, ")"), lwd = 2)
   })
  
 })

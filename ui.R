@@ -88,16 +88,18 @@ shinyUI(fluidPage(
                    plotOutput("disPlot1")
                  ),
                  conditionalPanel(
-                   condition = "input.effect == 1",
-                   plotOutput("disPlot2_1"),
-                   
+                   condition = "input.select == 3",
+                   conditionalPanel(
+                     condition = "input.effect == 1",
+                     plotOutput("disPlot2_1")
+                     ),
                    conditionalPanel(
                      condition = "input.effect == 2",
                      plotOutput("disPlot2_2")
+                     )
                    )
                  )),
         tabPanel("Tutorial")
       )
     )
-  )
 ))
