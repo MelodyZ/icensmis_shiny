@@ -44,7 +44,8 @@ shinyUI(fluidPage(
           sliderInput("spe2", "Specificity:",
                       min = 0, max = 1, value = 0.99),
           sliderInput("tim", "Times:",
-                      min = 1, max = 20, value = c(1,8)),
+                      min = 1, max = 20, 
+                      step = 1, value = c(1,8)),
           sliderInput("neven", "Noevent:",
                       min = 0, max = 1, value = 0.9)
         ),

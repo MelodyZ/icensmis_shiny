@@ -30,9 +30,9 @@ shinyServer(function(input, output) {
   Nlist <- seq(100, 15000, by = 100)
   
   output$disPlot1 <- renderPlot({
-    
-    lambda.base <- -log(input$neven)/max(input$tim)
-    survivals <- 1 - pexp(input$tim, lambda.base)
+    times <- seq(input$tim[1], input$tim[2], by = 1)
+    lambda.base <- -log(input$neven)/max(times)
+    survivals <- 1 - pexp(times, lambda.base)
     plot(0, 0, type = "n", xlab = "N", ylab = "Power", xlim = c(0, max(Nlist)), 
          cex.lab = 1.4, cex.main = 1.5, ylim = c(0, 1))
     
