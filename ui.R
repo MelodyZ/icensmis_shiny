@@ -10,13 +10,14 @@ library(shiny)
 shinyUI(navbarPage(" ",
   tabPanel("Study Design",
            titlePanel("Study design for time to event outcomes in the presence of error-prone diagnostic tests or self-reports"),
-           
+           br(),
+           br(),
            sidebarLayout(
              
              sidebarPanel(
                
                selectInput("select", "Choose a study you want to conduct",
-                           choices = list("Sample Size Estimation" = 1,
+                           choices = list("Sample Size and Power Calculation" = 1,
                                           "Figure 1. Comparison of power versus total sample size (N) for different values of the (sensitivity, specificity) of the diagnostic test" = 2,
                                           "Figure 2. Effects of hazard ratio, event rate, and number of tests on sample size for different (sensitivity, specificity)" = 3,
                                           "Figure 3. Relative efficiency of test schedule 1 and schedule 2" = 4,
@@ -25,14 +26,26 @@ shinyUI(navbarPage(" ",
                
                conditionalPanel(
                  condition = "input.select == 1",
+                 radioButtons("np", "Choose one argument you want to calculate:",
+                               choices = list("Sample Size" = 1,
+                                              "Power" = 2)),
                  textInput("HR", "Hazard ratio:",
                            value = 1.25),
+                             
+                 conditionalPanel(
+                   condition = "input.np == 1",
+                   sliderInput("power", "Power:",
+                               min = 0, max = 1, value = 0.9)),
+                 conditionalPanel(
+                   condition = "input.np == 2",
+                   textInput("n", "Sample Size:",
+                             value = 1000)
+                 ),
+                 
                  sliderInput("sen", "Sensitivity:",
                              min = 0, max = 1, value = 0.55),
                  sliderInput("spe", "Specificity:",
-                             min = 0, max = 1, value = 0.99),
-                 sliderInput("power", "Power:",
-                             min = 0, max = 1, value = 0.9)
+                             min = 0, max = 1, value = 0.99)
                ),
                
                conditionalPanel(
@@ -145,7 +158,12 @@ shinyUI(navbarPage(" ",
                
                conditionalPanel(
                  condition = "input.select == 1",
-                 textOutput("values")
+                 conditionalPanel(
+                   condition = "input.np == 1",
+                   textOutput("ssize")),
+                 conditionalPanel(
+                   condition = "input.np == 2",
+                   textOutput("power"))
                  ),
                
                conditionalPanel(
