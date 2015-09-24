@@ -30,7 +30,7 @@ shinyServer(function(input, output) {
   
   ## Calculate Sample Size
   output$ssize <- renderText({
-
+    surv <- exp(log(0.9) * (1:8)/8)
     ssize <- icpower(HR = as.numeric(input$HR), 
                      sensitivity = input$sen, 
                      specificity = input$spe, 
@@ -43,7 +43,7 @@ shinyServer(function(input, output) {
   })
   # Calculate Power
   output$power <- renderText({
-    
+    surv <- exp(log(0.9) * (1:8)/8)
     spower <- icpower(HR = as.numeric(input$HR), 
                       sensitivity = input$sen, 
                       specificity = input$spe, 
