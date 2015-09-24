@@ -23,7 +23,9 @@ shinyUI(fluidPage(
                     choices = list("Sample Size Estimation" = 1,
                                    "Figure 1. Comparison of power versus total sample size (N) for different values of the (sensitivity, specificity) of the diagnostic test" = 2,
                                    "Figure 2. Effects of hazard ratio, event rate, and number of tests on sample size for different (sensitivity, specificity)" = 3,
-                                   "Figure 3. Relative efficiency of test schedule 1 and schedule 2" = 4)),
+                                   "Figure 3. Relative efficiency of test schedule 1 and schedule 2" = 4,
+                                   "Figure 4. Relative efficiency of NTFP when compared to the Design 1" = 5,
+                                   "Total cost as function of the number of tests" = 6)),
         
         conditionalPanel(
           condition = "input.select == 1",
@@ -113,6 +115,32 @@ shinyUI(fluidPage(
                       min = 0, max = 1, value = 0.55),
           sliderInput("spe4", "Specificity:",
                       min = 0, max = 1, value = 0.99)
+        ),
+        
+        conditionalPanel(
+          condition = "input.select == 5",
+          sliderInput("cuminc", "Cumulative Incidence:",
+                      min = 0, max = 1, step = 0.1,
+                      value = 0.5),
+          sliderInput("sen5", "Sensitivity:",
+                      min = 0, max = 1, step = 0.01, 
+                      value = 0.55)
+        ),
+        conditionalPanel(
+          condition = "input.select == 6",
+          sliderInput("ntest6", "Notest:",
+                      min = 2, max = 20, 
+                      value = c(2, 6)),
+          sliderInput("cost", "Cost for each subject:",
+                      min = 0, max = 1, step = 0.1,
+                      value = 0.1),
+          helpText("* We assume Cost = 1 for perfect test, Cost = 0.1 for self-report."),
+          br(),
+          sliderInput("sen6", "Sensitivity:",
+                      min = 0, max = 1, value = 0.55),
+          sliderInput("spe6", "Specificity:",
+                      min = 0, max = 1, value = 0.99)
+          
         )
       ),
 
@@ -162,8 +190,17 @@ shinyUI(fluidPage(
                      condition = "input.effect4 == 3",
                      plotOutput("disPlot3_3")
                    )
-                 )
                  ),
+                 
+                 conditionalPanel(
+                   condition = "input.select == 5",
+                   plotOutput("disPlot4")
+                 ),
+                 conditionalPanel(
+                   condition = "input.select == 6",
+                   plotOutput("disPlot5")
+                 )
+        ),
         tabPanel("Tutorial")
       )
       )

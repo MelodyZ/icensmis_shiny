@@ -30,6 +30,7 @@ shinyServer(function(input, output) {
   Nlist <- seq(100, 15000, by = 100)
   
   output$disPlot1 <- renderPlot({
+    par(mfrow = c(2,2))
     times <- seq(input$tim[1], input$tim[2], by = 1)
     lambda.base <- -log(input$neven)/max(times)
     survivals <- 1 - pexp(times, lambda.base)
@@ -43,6 +44,16 @@ shinyServer(function(input, output) {
                    Nlist)$result
     lines(pow$N, pow$power, lwd = 2)
     legend("topleft", cex = 1.25, legend = paste("(", input$sen2, ", ", input$spe2, ")"), lwd = 1.5)
+    
+    ## 3.5 Effect of using an imperfect diagnostic procedure at study entry
+      negpred <- seq(1, 0.9, -0.01)
+      survivals <- exp(log(0.9) * (1:8)/8)
+      ssize <- sapply(negpred, function(x) icpower(2, input$sen2, input$spe2, survivals, power = 0.9, negpred = x)$result$N)
+      mard <- par("mar") ## margin size
+      mard[3] <- mard[3]/2
+      par(mar = mard)
+      plot(1 - negpred, ssize, type = "o", xlab = expression(1 - eta), ylab = "Sample Size", lwd = 2)
+    
   })
   
   #Figure 2
@@ -154,6 +165,45 @@ shinyServer(function(input, output) {
     lines(ntest, ratio, lwd = 2)
     legend("topright", legend = paste("(", input$sen4, ", ", input$spe4, ")"), lwd = 2)
   })
-   
+  
+  # 3.4 Relative efficiency of NTFP when compared to the Design 1
+  output$disPlot4 <- renderPlot({
+    HR <- 1.25
+    tests <- 1:8
+    specificity <- seq(0.7, 1, by = 0.01)
+    plot(1, 1, type = "n", log = "y", xlab = "Specificity", ylab = "Sample size ratio", ylim = c(1, 55), xlim = c(0.7, 1), cex.lab = 1.2)
+    noevent <- input$cuminc
+    survivals <- exp(log(noevent)/max(tests) * tests) 
+    MCAR <- sapply(specificity, function(x) icpower(HR, input$sen5, x, survivals, power = 0.9, design = "MCAR")$result$N)
+    NTFP <- sapply(specificity, function(x) icpower(HR, input$sen5, x, survivals, power = 0.9, design = "NTFP")$result$N)
+    ratio <- NTFP/MCAR
+    lines(specificity, ratio, lwd = 2)
+    legtex <- paste("S[J + 1] =", input$cuminc, ", Sensitivity=", input$sen5)
+    legend("topright", legend = legtex, lwd = 2)
+  })
+  
+  # Total cost as function of the number of tests
+  output$disPlot5 <- renderPlot({
+    HR <- 1.25
+    noevent <- 0.9
+    ntest <- seq(input$ntest6[1], input$ntest6[2], by = 1)
+    ## Function to calculate sample size for number of tests 
+    sample.size <- function(num.test) {
+      testtimes <- 1:num.test/num.test * 8
+      survivals <- exp(log(noevent) * testtimes/max(testtimes))
+      ssize <- icpower(HR, 0.55, 0.99, survivals, power = 0.9)$result$N
+    }
+    ssize <- sapply(ntest, sample.size)
+    C0 <- 1
+    C <- input$cost
+    cost <- C0 * ssize + C * ssize * ntest
+    cost1 <- C0 * ssize + 0.1 * ssize * input$ntest6
+    cost2 <- C0 * ssize + 1 * ssize * input$ntest6
+    par(mfrow = c(1, 2))
+    plot(ntest, cost, ylim = range(c(cost1, cost2)), type = "o", pch = 1, xlab = "Number of tests", ylab = "Cost", cex.lab = 1.25, main = "(a)")
+    legend("topleft", legend = paste("(", input$sen6, ", ", input$spe6, ")"), lwd = 2)
+    plot(ntest, cost, type = "o", pch = 2, xlab = "Number of tests", ylab = "Cost", cex.lab = 1.25, main = "(b)")
+    
+  })
  
 })
