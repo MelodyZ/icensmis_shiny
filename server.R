@@ -48,7 +48,7 @@ shinyServer(function(input, output) {
   Nlist <- seq(100, 15000, by = 100)
   
   output$disPlot1 <- renderPlot({
-    par(mfrow = c(2,2))
+    par(mfrow = c(1, 2))
     times <- seq(input$tim[1], input$tim[2], by = 1)
     lambda.base <- -log(input$neven)/max(times)
     survivals <- 1 - pexp(times, lambda.base)
@@ -70,7 +70,7 @@ shinyServer(function(input, output) {
       mard <- par("mar") ## margin size
       mard[3] <- mard[3]/2
       par(mar = mard)
-      plot(1 - negpred, ssize, type = "o", xlab = expression(1 - eta), ylab = "Sample Size", lwd = 2)
+      plot(1 - negpred, ssize, type = "o", xlab = expression(1 - eta), ylab = "Sample Size", main = "Imperfect diagnostic procedure", cex.lab = 1.4, cex.main = 1.5, lwd = 2)
     
   })
   
