@@ -18,6 +18,12 @@ shinyUI(fluidPage(
   sidebarLayout(
 
       sidebarPanel(
+        
+        #Input File
+        fileInput('file1', 'Choose CSV File',
+                  accept=c('text/csv', 
+                           'text/comma-separated-values,text/plain', 
+                           '.csv')),
       
         selectInput("select", "Choose a study you want to conduct",
                     choices = list("Sample Size Estimation" = 1,
@@ -201,6 +207,9 @@ shinyUI(fluidPage(
                    plotOutput("disPlot5")
                  )
         ),
+        tabPanel("Table", 
+                 tableOutput('contents')),
+        
         tabPanel("Tutorial")
       )
       )
