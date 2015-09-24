@@ -7,211 +7,210 @@
 
 library(shiny)
 
-shinyUI(fluidPage(
-
-  # Application title
-  titlePanel("Study design for time to event outcomes in the presence of error-prone diagnostic tests or self-reports"),
-  br(),
-  br(),
-
-  # Sidebar with a slider input for number of bins
-  sidebarLayout(
-
-      sidebarPanel(
-        
-        #Input File
-        fileInput('file1', 'Choose CSV File',
-                  accept=c('text/csv', 
-                           'text/comma-separated-values,text/plain', 
-                           '.csv')),
-      
-        selectInput("select", "Choose a study you want to conduct",
-                    choices = list("Sample Size Estimation" = 1,
-                                   "Figure 1. Comparison of power versus total sample size (N) for different values of the (sensitivity, specificity) of the diagnostic test" = 2,
-                                   "Figure 2. Effects of hazard ratio, event rate, and number of tests on sample size for different (sensitivity, specificity)" = 3,
-                                   "Figure 3. Relative efficiency of test schedule 1 and schedule 2" = 4,
-                                   "Figure 4. Relative efficiency of NTFP when compared to the Design 1" = 5,
-                                   "Total cost as function of the number of tests" = 6)),
-        
-        conditionalPanel(
-          condition = "input.select == 1",
-          textInput("HR", "Hazard ratio:",
-                    value = 1.25),
-          sliderInput("sen", "Sensitivity:",
-                      min = 0, max = 1, value = 0.55),
-          sliderInput("spe", "Specificity:",
-                      min = 0, max = 1, value = 0.99),
-          sliderInput("power", "Power:",
-                      min = 0, max = 1, value = 0.9)
-          ),
-        
-        conditionalPanel(
-          condition = "input.select == 2",
-          sliderInput("sen2", "Sensitivity:",
-                      min = 0, max = 1, value = 0.55),
-          sliderInput("spe2", "Specificity:",
-                      min = 0, max = 1, value = 0.99),
-          sliderInput("tim", "Times:",
-                      min = 1, max = 20, 
-                      step = 1, value = c(1,8)),
-          sliderInput("neven", "Noevent:",
-                      min = 0, max = 1, value = 0.9)
-        ),
-        
-        conditionalPanel(
-          condition = "input.select == 3",
-          radioButtons("effect", "Effect of",
-                       choices = list("Hazard Ratio" = 1,
-                                      "Cumulative Incidence" = 2,
-                                      "Number of Tests" = 3)),
-          conditionalPanel(
-            condition = "input.effect == 1",
-            sliderInput("HRange", "Hazard Ratio Range:",
-                        min = 1, max = 3, step = 0.05, 
-                        value = c(1.5, 2.5))
-            ),
-          conditionalPanel(
-            condition = "input.effect == 2",
-            sliderInput("nevent", "Noevent:",
-                        min = 0, max = 1, step = 0.05, 
-                        value = c(0.2, 0.9))
-          ),
-          conditionalPanel(
-            condition = "input.effect == 3",
-            sliderInput("ntest", "Notest:",
-                        min = 2, max = 20, step = 2, 
-                        value = c(2, 10))
-          ),
-          
-          sliderInput("sen3", "Sensitivity:",
-                      min = 0, max = 1, value = 0.55),
-          sliderInput("spe3", "Specificity:",
-                      min = 0, max = 1, value = 0.99)
-        ),
-        
-        conditionalPanel(
-          condition = "input.select == 4",
-          helpText("* Schedules: a list of test time indices for each schedule."),
-          helpText("* Ratios: ratio of subjects assigned to each schedule."),
-          br(),
-          radioButtons("effect4", "Effect of",
-                       choices = list("Hazard Ratio" = 1,
-                                      "Cumulative Incidence" = 2,
-                                      "Number of Tests" = 3)),
-          conditionalPanel(
-            condition = "input.effect4 == 1",
-            sliderInput("HRange", "Hazard Ratio Range:",
-                        min = 1, max = 3, step = 0.05, 
-                        value = c(1.5, 2.5))
-          ),
-          conditionalPanel(
-            condition = "input.effect4 == 2",
-            sliderInput("nevent", "Noevent:",
-                        min = 0, max = 1, step = 0.05, 
-                        value = c(0.2, 0.9))
-          ),
-          conditionalPanel(
-            condition = "input.effect4 == 3",
-            sliderInput("ntest4", "Notest:",
-                        min = 2, max = 20, step = 2, 
-                        value = c(4, 16))
-          ),
-          
-          sliderInput("sen4", "Sensitivity:",
-                      min = 0, max = 1, value = 0.55),
-          sliderInput("spe4", "Specificity:",
-                      min = 0, max = 1, value = 0.99)
-        ),
-        
-        conditionalPanel(
-          condition = "input.select == 5",
-          sliderInput("cuminc", "Cumulative Incidence:",
-                      min = 0, max = 1, step = 0.1,
-                      value = 0.5),
-          sliderInput("sen5", "Sensitivity:",
-                      min = 0, max = 1, step = 0.01, 
-                      value = 0.55)
-        ),
-        conditionalPanel(
-          condition = "input.select == 6",
-          sliderInput("ntest6", "Notest:",
-                      min = 2, max = 20, 
-                      value = c(2, 6)),
-          sliderInput("cost", "Cost for each subject:",
-                      min = 0, max = 1, step = 0.1,
-                      value = 0.1),
-          helpText("* We assume Cost = 1 for perfect test, Cost = 0.1 for self-report."),
-          br(),
-          sliderInput("sen6", "Sensitivity:",
-                      min = 0, max = 1, value = 0.55),
-          sliderInput("spe6", "Specificity:",
-                      min = 0, max = 1, value = 0.99)
-          
-        )
-      ),
-
-    # Show a plot of the generated distribution
-    mainPanel(
-      tabsetPanel(
-        tabPanel("Plot",
+shinyUI(navbarPage(" ",
+  tabPanel("Study Design",
+           titlePanel("Study design for time to event outcomes in the presence of error-prone diagnostic tests or self-reports"),
+           
+           sidebarLayout(
+             
+             sidebarPanel(
+               
+               selectInput("select", "Choose a study you want to conduct",
+                           choices = list("Sample Size Estimation" = 1,
+                                          "Figure 1. Comparison of power versus total sample size (N) for different values of the (sensitivity, specificity) of the diagnostic test" = 2,
+                                          "Figure 2. Effects of hazard ratio, event rate, and number of tests on sample size for different (sensitivity, specificity)" = 3,
+                                          "Figure 3. Relative efficiency of test schedule 1 and schedule 2" = 4,
+                                          "Figure 4. Relative efficiency of NTFP when compared to the Design 1" = 5,
+                                          "Total cost as function of the number of tests" = 6)),
+               
+               conditionalPanel(
+                 condition = "input.select == 1",
+                 textInput("HR", "Hazard ratio:",
+                           value = 1.25),
+                 sliderInput("sen", "Sensitivity:",
+                             min = 0, max = 1, value = 0.55),
+                 sliderInput("spe", "Specificity:",
+                             min = 0, max = 1, value = 0.99),
+                 sliderInput("power", "Power:",
+                             min = 0, max = 1, value = 0.9)
+               ),
+               
+               conditionalPanel(
+                 condition = "input.select == 2",
+                 sliderInput("sen2", "Sensitivity:",
+                             min = 0, max = 1, value = 0.55),
+                 sliderInput("spe2", "Specificity:",
+                             min = 0, max = 1, value = 0.99),
+                 sliderInput("tim", "Times:",
+                             min = 1, max = 20, 
+                             step = 1, value = c(1,8)),
+                 sliderInput("neven", "Noevent:",
+                             min = 0, max = 1, value = 0.9)
+               ),
+               
+               conditionalPanel(
+                 condition = "input.select == 3",
+                 radioButtons("effect", "Effect of",
+                              choices = list("Hazard Ratio" = 1,
+                                             "Cumulative Incidence" = 2,
+                                             "Number of Tests" = 3)),
+                 conditionalPanel(
+                   condition = "input.effect == 1",
+                   sliderInput("HRange", "Hazard Ratio Range:",
+                               min = 1, max = 3, step = 0.05, 
+                               value = c(1.5, 2.5))
+                 ),
+                 conditionalPanel(
+                   condition = "input.effect == 2",
+                   sliderInput("nevent", "Noevent:",
+                               min = 0, max = 1, step = 0.05, 
+                               value = c(0.2, 0.9))
+                 ),
+                 conditionalPanel(
+                   condition = "input.effect == 3",
+                   sliderInput("ntest", "Notest:",
+                               min = 2, max = 20, step = 2, 
+                               value = c(2, 10))
+                 ),
+                 
+                 sliderInput("sen3", "Sensitivity:",
+                             min = 0, max = 1, value = 0.55),
+                 sliderInput("spe3", "Specificity:",
+                             min = 0, max = 1, value = 0.99)
+               ),
+               
+               conditionalPanel(
+                 condition = "input.select == 4",
+                 helpText("* Schedules: a list of test time indices for each schedule."),
+                 helpText("* Ratios: ratio of subjects assigned to each schedule."),
                  br(),
+                 radioButtons("effect4", "Effect of",
+                              choices = list("Hazard Ratio" = 1,
+                                             "Cumulative Incidence" = 2,
+                                             "Number of Tests" = 3)),
                  conditionalPanel(
-                   condition = "input.select == 1",
-                   textOutput("values")
+                   condition = "input.effect4 == 1",
+                   sliderInput("HRange", "Hazard Ratio Range:",
+                               min = 1, max = 3, step = 0.05, 
+                               value = c(1.5, 2.5))
                  ),
                  conditionalPanel(
-                   condition = "input.select == 2",
-                   plotOutput("disPlot1")
+                   condition = "input.effect4 == 2",
+                   sliderInput("nevent", "Noevent:",
+                               min = 0, max = 1, step = 0.05, 
+                               value = c(0.2, 0.9))
+                 ),
+                 conditionalPanel(
+                   condition = "input.effect4 == 3",
+                   sliderInput("ntest4", "Notest:",
+                               min = 2, max = 20, step = 2, 
+                               value = c(4, 16))
                  ),
                  
+                 sliderInput("sen4", "Sensitivity:",
+                             min = 0, max = 1, value = 0.55),
+                 sliderInput("spe4", "Specificity:",
+                             min = 0, max = 1, value = 0.99)
+               ),
+               
+               conditionalPanel(
+                 condition = "input.select == 5",
+                 sliderInput("cuminc", "Cumulative Incidence:",
+                             min = 0, max = 1, step = 0.1,
+                             value = 0.5),
+                 sliderInput("sen5", "Sensitivity:",
+                             min = 0, max = 1, step = 0.01, 
+                             value = 0.55)
+               ),
+               conditionalPanel(
+                 condition = "input.select == 6",
+                 sliderInput("ntest6", "Notest:",
+                             min = 2, max = 20, 
+                             value = c(2, 6)),
+                 sliderInput("cost", "Cost for each subject:",
+                             min = 0, max = 1, step = 0.1,
+                             value = 0.1),
+                 helpText("* We assume Cost = 1 for perfect test, Cost = 0.1 for self-report."),
+                 br(),
+                 sliderInput("sen6", "Sensitivity:",
+                             min = 0, max = 1, value = 0.55),
+                 sliderInput("spe6", "Specificity:",
+                             min = 0, max = 1, value = 0.99)
+                 
+               )
+             ),
+             
+             # Show a plot of the generated distribution
+             mainPanel(
+               
+               conditionalPanel(
+                 condition = "input.select == 1",
+                 textOutput("values")
+                 ),
+               
+               conditionalPanel(
+                 condition = "input.select == 2",
+                 plotOutput("disPlot1")
+                 ),
+               
+               conditionalPanel(
+                 condition = "input.select == 3",
                  conditionalPanel(
-                   condition = "input.select == 3",
-                   
-                   conditionalPanel(
-                     condition = "input.effect == 1",
-                     plotOutput("disPlot2_1")
-                     ),
-                   conditionalPanel(
-                     condition = "input.effect == 2",
-                     plotOutput("disPlot2_2")
-                     ),
-                   conditionalPanel(
-                     condition = "input.effect == 3",
-                     plotOutput("disPlot2_3")
+                   condition = "input.effect == 1",
+                   plotOutput("disPlot2_1")
+                   ),
+                 conditionalPanel(
+                   condition = "input.effect == 2",
+                   plotOutput("disPlot2_2")
+                   ),
+                 conditionalPanel(
+                   condition = "input.effect == 3",
+                   plotOutput("disPlot2_3")
                    )
-                   ),
-                 
+                 ),
+               
+               conditionalPanel(
+                 condition = "input.select == 4",
                  conditionalPanel(
-                   condition = "input.select == 4",
-                   
-                   conditionalPanel(
-                     condition = "input.effect4 == 1",
-                     plotOutput("disPlot3_1")
+                   condition = "input.effect4 == 1",
+                   plotOutput("disPlot3_1")
                    ),
-                   conditionalPanel(
-                     condition = "input.effect4 == 2",
-                     plotOutput("disPlot3_2")
+                 conditionalPanel(
+                   condition = "input.effect4 == 2",
+                   plotOutput("disPlot3_2")
                    ),
-                   conditionalPanel(
-                     condition = "input.effect4 == 3",
-                     plotOutput("disPlot3_3")
+                 conditionalPanel(
+                   condition = "input.effect4 == 3",
+                   plotOutput("disPlot3_3")
                    )
                  ),
-                 
-                 conditionalPanel(
-                   condition = "input.select == 5",
-                   plotOutput("disPlot4")
+               
+               conditionalPanel(
+                 condition = "input.select == 5",
+                 plotOutput("disPlot4")
                  ),
-                 conditionalPanel(
-                   condition = "input.select == 6",
-                   plotOutput("disPlot5")
+               conditionalPanel(
+                 condition = "input.select == 6",
+                 plotOutput("disPlot5")
                  )
-        ),
-        tabPanel("Table", 
-                 tableOutput('contents')),
-        
-        tabPanel("Tutorial")
-      )
-      )
-    )
-))
+               )
+             )
+           ),
+  tabPanel("Data Analysis",
+           sidebarLayout(
+             sidebarPanel(
+               
+               #Insert File
+               fileInput('file1', 'Choose CSV File',
+                         accept=c('text/csv', 
+                                  'text/comma-separated-values,text/plain', 
+                                  '.csv'))
+             ),
+             mainPanel(
+               tableOutput('contents')
+             )
+           )
+  ),
+  tabPanel("Background")
+)
+)
