@@ -44,7 +44,7 @@ shinyServer(function(input, output, session) {
                                power = input$pw))
       result_ss <- ssize$result[[1]]
       
-      paste("Your sample size is:", as.character(result_ss), ".")
+      paste("Sample Size is:", as.character(result_ss), ".")
       
     })
     
@@ -64,8 +64,33 @@ shinyServer(function(input, output, session) {
                                 N = input$n))
       result_p <- spower$result[[4]]
       
-      paste("Your power is:", as.character(round(result_p,2)), ".")
+      paste("Power is:", as.character(round(result_p,2)), ".")
       
     })
     
+    output$matrix1 <- renderTable({
+      if (input$submt == 0)
+        return()
+      
+      df <- isolate(as.data.frame(matrix(list(input$pw, input$HR, input$sen, input$spe, input$surv, 
+                    input$rho, input$pmis, input$dsn, input$negp),
+                    nrow = 9)))
+      rownames(df) <- c('Power', 'Hazard Ratio', 'Sensitivity', 'Specivility',
+                       "Survivals", "Rho", "Pmiss", "Design", "Negpred")
+      colnames(df) <- "Values"
+      df
+    }, align = "ll")
+    
+    output$matrix2 <- renderTable({
+      if (input$submt == 0)
+        return()
+      
+      df <- isolate(as.data.frame(matrix(list(input$n, input$HR, input$sen, input$spe, input$surv, 
+                                              input$rho, input$pmis, input$dsn, input$negp),
+                                         nrow = 9)))
+      rownames(df) <- c('Sample Size', 'Hazard Ratio', 'Sensitivity', 'Specivility',
+                        "Survivals", "Rho", "Pmiss", "Design", "Negpred")
+      colnames(df) <- "Values"
+      df
+    }, align = "ll")
   }) 
