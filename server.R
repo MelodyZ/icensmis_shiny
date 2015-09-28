@@ -6,12 +6,13 @@
 #
 
 library(shiny)
+library(shinyBS)
 library(icensmis)
 
 shinyServer(function(input, output, session) {
   
   #Insert File
-  output$contents <- renderTable(input$submt, {
+  output$contents <- renderTable( {
     
     # input$file1 will be NULL initially. After the user selects
     # and uploads a file, it will be a data frame with 'name',
@@ -43,8 +44,12 @@ shinyServer(function(input, output, session) {
                                negpred = input$negp,
                                power = input$pw))
       result_ss <- ssize$result[[1]]
+      result_ss_1 <- ssize$result[[2]]
+      result_ss_2 <- ssize$result[[3]]
       
-      paste("Sample Size is:", as.character(result_ss), ".")
+      paste("The total Sample Size is:", as.character(result_ss), ".", 
+            "There are ", as.character(result_ss_1), "subjects in GROUP 1, ",
+            "and", as.character(result_ss_2) ,"subjects in GROUP 2.")
       
     })
     
@@ -64,7 +69,7 @@ shinyServer(function(input, output, session) {
                                 N = input$n))
       result_p <- spower$result[[4]]
       
-      paste("Power is:", as.character(round(result_p,2)), ".")
+      paste("Power:", as.character(round(result_p,2)), ".")
       
     })
     
