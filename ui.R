@@ -151,11 +151,42 @@ shinyUI(navbarPage(" ",
                               )
                             ),
                    tabPanel("Data Analysis",
+                            
+                            tags$head(
+                              tags$style(HTML("
+                                              /* Smaller font for preformatted text */
+                                              pre, table.table {
+                                              font-size: smaller;
+                                              }
+                                              
+                                              body {
+                                              min-height: 2000px;
+                                              }
+                                              
+                                              .option-group2 {
+                                              border: 1px solid #ccc;
+                                              border-radius: 6px;
+                                              padding: 0px 5px;
+                                              margin: 5px -10px;
+                                              background-color: #f5f5f5;
+                                              }
+                                              
+                                              .option-header {
+                                              font-weight: bold;
+                                              color: #808080;
+                                              text-transform: uppercase;
+                                              margin-bottom: 5px;
+                                              }
+                                              "))
+                                              ),
+                            
                             sidebarLayout(
                               sidebarPanel(
                                 
+                                div(class = "option-group2",
+                                    div(class = "option-header", "Data Input"),
                                 #Insert File
-                                fileInput('file1', 'Choose CSV File',
+                                fileInput('file1', 'Choose a CSV File',
                                           accept=c('text/csv', 
                                                    'text/comma-separated-values,text/plain', 
                                                    '.csv')),
@@ -163,15 +194,27 @@ shinyUI(navbarPage(" ",
                                 br(),
                                 actionButton("upload", "Upload"),
                                 br(),
-                                helpText('Click the "Submit" to display your result.'),
+                                helpText('Click the "Upload" to display your subtable.'),
+                                bsPopover("sep", title = "", content = "If no separator character, please leave it blank",
+                                          placement = "right", options = list(container = "body"))),
                                 br(),
-                                bsPopover("sep", title = "", content = "If no separator character, leave it blank",
-                                          placement = "right", options = list(container = "body")),
+                                
+                                div(class = "option-group2",
+                                    div(class = "option-header", "Predictors Input"),
+                                    br(),
                                 conditionalPanel("output.data",
                                                  uiOutput("Id"),
+                                                 bsPopover("Id", title = "", content = "Variable in data for subject id.",
+                                                           placement = "right", options = list(container = "body")),
                                                  uiOutput("Tt"),
+                                                 bsPopover("Tt", title = "", content = "Variable in data for test time. Assume all test times are non-negative. testtime = 0 refers to baseline visit (only used/needed if the model is time varying covarites).",
+                                                           placement = "right", options = list(container = "body")),
                                                  uiOutput("Res"),
+                                                 bsPopover("Res", title = "", content = "Variable in data for test result.",
+                                                           placement = "right", options = list(container = "body")),
                                                  uiOutput("Cov"),
+                                                 bsPopover("Cov", title = "Variable in data that is possibly predictive of the outcome.", 
+                                                           content = "If no covariates, please leave it blank.", placement = "right", options = list(container = "body")),
                                                  sliderInput("sen", "Sensitivity",
                                                              min = 0, max = 1, 
                                                              step = 0.01, value = 0.7),
@@ -183,7 +226,7 @@ shinyUI(navbarPage(" ",
                                                  actionButton("submt2", "Submit"),
                                                  br(),
                                                  helpText('Click the "Submit" to display your result.')
-                                                 )
+                                                 ))
                               ),
                               mainPanel(
                                 bsCollapse(id = "Panels",
