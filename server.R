@@ -9,7 +9,7 @@ library(shiny)
 library(shinyBS)
 library(icensmis)
 
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
 
 #------------------------------------------------------------------------------------------------
     # Calculate Sample Size
@@ -87,8 +87,11 @@ shinyServer(function(input, output) {
     #Insert File
     data <- reactive({
       file <- input$file1
-      if(is.null(file)){return()}
-      read.csv(file = file$datapath, header = T, sep = input$sep)
+      if (input$upload == 0)
+        return()
+      if(is.null(file))
+        {return()}
+      isolate(read.csv(file = file$datapath, header = T, sep = input$sep))
     })
     
     datavar <- reactive({
@@ -97,9 +100,22 @@ shinyServer(function(input, output) {
       return(Names)
     })
     
+    ### Open Panel 1
+    observeEvent(input$upload, ({
+      updateCollapse(session, "Panels", open = "Review your dataset", close = "Results")
+    }))
+    
+    observeEvent(input$file1, ({
+      updateCollapse(session, "Panels", close = c("Results", "Review your dataset"))
+    }))
+    
     output$data <- renderTable({
+      #if (input$upload == 0)
+      #  return()
       if(is.null(data())){return()}
-      head(data())
+      #isolate(
+        head(data())
+      #  )
     })
     
     outputOptions(output, 'data', suspendWhenHidden=FALSE)
@@ -137,7 +153,24 @@ shinyServer(function(input, output) {
       selectInput("cov", "Covariate", vars4, selected = NULL, multiple = T)
     })
     
+    observeEvent(input$upload, ({
+      updateSelectInput(session, "id")
+      updateSelectInput(session, "tt")
+      updateSelectInput(session, "res")
+      updateSelectInput(session, "cov")
+    }))
+    
     ## Results
+    
+    ### Open Panel 2
+    observeEvent(input$submt2, ({
+      updateCollapse(session, "Panels", open = "Results")
+    }))
+    
+    observeEvent(input$file1, ({
+      updateCollapse(session, "Panels")
+    }))
+    
     covInput <- reactive({
       df <- data()
       if (is.null(input$cov)){return(NULL)}
@@ -145,29 +178,33 @@ shinyServer(function(input, output) {
     })
     
     output$loglik <- renderText({
+      if (input$submt2 == 0)
+        return()
       df <- data()
       #cov <- as.name(paste(input$cov, collapse = " + "))
-      fit1 <- icmis(subject = df[,input$id],
+      fit1 <- isolate(icmis(subject = df[,input$id],
                     testtime = df[,input$tt],
                     data = data(),
                     result = df[,input$res],
                     sensitivity = input$sen,
                     specificity = input$spe,
                     formula = covInput()
-                    )
+                    ))
       res1 <- round(fit1$loglik, 4)
       paste("Your Loglikelihood is:", res1)
     })
     
     output$coef <- renderTable({
+      if (input$submt2 == 0)
+        return()
       df <- data()
-      fit2 <- icmis(subject = df[,input$id],
+      fit2 <- isolate(icmis(subject = df[,input$id],
                     testtime = df[,input$tt],
                     data = data(),
                     result = df[,input$res],
                     sensitivity = input$sen,
                     specificity= input$spe,
-                    formula = covInput())
+                    formula = covInput()))
       res2 <- fit2$coefficient
       res2 <- as.matrix(res2)
       res2
@@ -177,28 +214,32 @@ shinyServer(function(input, output) {
     caption.width = getOption("xtable.caption.width", NULL))
     
     output$coefui <- renderUI({
+      if (input$submt2 == 0)
+        return()
       df <- data()
-      fit2 <- icmis(subject = df[,input$id],
+      fit2 <- isolate(icmis(subject = df[,input$id],
                     testtime = df[,input$tt],
                     data = data(),
                     result = df[,input$res],
                     sensitivity = input$sen,
                     specificity= input$spe,
-                    formula = covInput())
+                    formula = covInput()))
       res2 <- fit2$coefficient
       if (is.na(res2)){return("There are no coefficient for your dataset.")}
       tableOutput("coef")
     })
     
     output$surv <- renderTable({
+      if (input$submt2 == 0)
+        return()
       df <- data()
-      fit3 <- icmis(subject = df[,input$id],
+      fit3 <- isolate(icmis(subject = df[,input$id],
                     testtime = df[,input$tt],
                     data = data(),
                     result = df[,input$res],
                     sensitivity = input$sen,
                     specificity= input$spe,
-                    formula = covInput())
+                    formula = covInput()))
       res3 <- fit3$survival
       res3 <- as.matrix(res3)
       res3
@@ -207,28 +248,32 @@ shinyServer(function(input, output) {
     caption.width = getOption("xtable.caption.width", NULL))
     
     output$beta <- renderTable({
+      if (input$submt2 == 0)
+        return()
       df <- data()
-      fit4 <- icmis(subject = df[,input$id],
+      fit4 <- isolate(icmis(subject = df[,input$id],
                     testtime = df[,input$tt],
                     data = data(),
                     result = df[,input$res],
                     sensitivity = input$sen,
                     specificity= input$spe,
-                    formula = covInput())
+                    formula = covInput()))
       res4 <- as.matrix(fit4$beta.cov)
       res4 <- format(res4, nsmall = 4)}, caption = "Beta.cov Table:",
       caption.placement = getOption("xtable.caption.placement", "top"), 
       caption.width = getOption("xtable.caption.width", NULL))
     
     output$betaui <- renderUI({
+      if (input$submt2 == 0)
+        return()
       df <- data()
-      fit4 <- icmis(subject = df[,input$id],
+      fit4 <- isolate(icmis(subject = df[,input$id],
                     testtime = df[,input$tt],
                     data = data(),
                     result = df[,input$res],
                     sensitivity = input$sen,
                     specificity= input$spe,
-                    formula = covInput())
+                    formula = covInput()))
       res4 <- fit4$coefficient
       if (is.na(res4)){return("There are no beta.cov for your dataset.")}
       tableOutput("beta")
@@ -236,14 +281,16 @@ shinyServer(function(input, output) {
 
     
     output$n <- renderText({
+      if (input$submt2 == 0)
+        return()
       df <- data()
-      fit5 <- icmis(subject = df[,input$id],
+      fit5 <- isolate(icmis(subject = df[,input$id],
                     testtime = df[,input$tt],
                     data = data(),
                     result = df[,input$res],
                     sensitivity = input$sen,
                     specificity= input$spe,
-                    formula = covInput())
+                    formula = covInput()))
       res5 <- fit5$nsub
       paste("Your Sample Size is: ", res5)
     })
