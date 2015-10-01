@@ -9,27 +9,10 @@ library(shiny)
 library(shinyBS)
 library(icensmis)
 
-shinyServer(function(input, output, session) {
-  
-  #Insert File
-  output$contents <- renderTable( {
-    
-    # input$file1 will be NULL initially. After the user selects
-    # and uploads a file, it will be a data frame with 'name',
-    # 'size', 'type', and 'datapath' columns. The 'datapath'
-    # column will contain the local filenames where the data can
-    # be found.
-    
-    inFile <- input$file1
-    
-    if (is.null(inFile))
-      return(NULL)
-    
-    read.csv(inFile$datapath, header=input$header, sep=input$sep, 
-             quote=input$quote)
-  })
+shinyServer(function(input, output) {
 
-    ## Calculate Sample Size
+#------------------------------------------------------------------------------------------------
+    # Calculate Sample Size
     output$ssize <- renderText({
       if (input$submt == 0)
         return()
@@ -98,4 +81,172 @@ shinyServer(function(input, output, session) {
       colnames(df) <- "Values"
       df
     }, align = "ll")
+    
+    #---------------------------------------------------------------------------------------------------
+    
+    #Insert File
+    data <- reactive({
+      file <- input$file1
+      if(is.null(file)){return()}
+      read.csv(file = file$datapath, header = T, sep = input$sep)
+    })
+    
+    datavar <- reactive({
+      #if(is.null(data())){return()}
+      Names <- names(data())
+      return(Names)
+    })
+    
+    output$data <- renderTable({
+      if(is.null(data())){return()}
+      head(data())
+    })
+    
+    outputOptions(output, 'data', suspendWhenHidden=FALSE)
+    
+    output$Id <- renderUI({
+      #df <- data()
+      #vars <- datavar()
+      if(is.null(data())){return()}
+      selectInput("id", "Subject ID", datavar())
+    })
+    
+    output$Tt <- renderUI({
+      df <- data()
+      vars <- datavar()
+      vars2 <- subset(vars, vars != input$id)
+      #vars <- names(df[, -which(names(df) == input$id)])
+      if(is.null(df)){return()}
+      selectInput("tt", "Test Time", vars2)
+    })
+    
+    output$Res <- renderUI({
+      df <- data()
+      vars <- datavar()
+      vars3 <- subset(vars, vars != input$id & vars != input$tt)
+      #vars <- names(df[, -which(names(df) == input$id)])
+      if(is.null(df)){return()}
+      selectInput("res", "Result", vars3)
+    })
+    
+    output$Cov <- renderUI({
+      df <- data()
+      vars <- datavar()
+      vars4 <- subset(vars, vars != input$id & vars != input$tt & vars != input$res)
+      if(is.null(df)){return()}
+      selectInput("cov", "Covariate", vars4, selected = NULL, multiple = T)
+    })
+    
+    ## Results
+    covInput <- reactive({
+      df <- data()
+      if (is.null(input$cov)){return(NULL)}
+      as.formula(paste0("~", paste0(input$cov, collapse = " + ")))
+    })
+    
+    output$loglik <- renderText({
+      df <- data()
+      #cov <- as.name(paste(input$cov, collapse = " + "))
+      fit1 <- icmis(subject = df[,input$id],
+                    testtime = df[,input$tt],
+                    data = data(),
+                    result = df[,input$res],
+                    sensitivity = input$sen,
+                    specificity = input$spe,
+                    formula = covInput()
+                    )
+      res1 <- round(fit1$loglik, 4)
+      paste("Your Loglikelihood is:", res1)
+    })
+    
+    output$coef <- renderTable({
+      df <- data()
+      fit2 <- icmis(subject = df[,input$id],
+                    testtime = df[,input$tt],
+                    data = data(),
+                    result = df[,input$res],
+                    sensitivity = input$sen,
+                    specificity= input$spe,
+                    formula = covInput())
+      res2 <- fit2$coefficient
+      res2 <- as.matrix(res2)
+      res2
+      
+    }, caption = "Coefficient Table:",
+    caption.placement = getOption("xtable.caption.placement", "top"), 
+    caption.width = getOption("xtable.caption.width", NULL))
+    
+    output$coefui <- renderUI({
+      df <- data()
+      fit2 <- icmis(subject = df[,input$id],
+                    testtime = df[,input$tt],
+                    data = data(),
+                    result = df[,input$res],
+                    sensitivity = input$sen,
+                    specificity= input$spe,
+                    formula = covInput())
+      res2 <- fit2$coefficient
+      if (is.na(res2)){return("There are no coefficient for your dataset.")}
+      tableOutput("coef")
+    })
+    
+    output$surv <- renderTable({
+      df <- data()
+      fit3 <- icmis(subject = df[,input$id],
+                    testtime = df[,input$tt],
+                    data = data(),
+                    result = df[,input$res],
+                    sensitivity = input$sen,
+                    specificity= input$spe,
+                    formula = covInput())
+      res3 <- fit3$survival
+      res3 <- as.matrix(res3)
+      res3
+    }, caption = "Survival Table:",
+    caption.placement = getOption("xtable.caption.placement", "top"), 
+    caption.width = getOption("xtable.caption.width", NULL))
+    
+    output$beta <- renderTable({
+      df <- data()
+      fit4 <- icmis(subject = df[,input$id],
+                    testtime = df[,input$tt],
+                    data = data(),
+                    result = df[,input$res],
+                    sensitivity = input$sen,
+                    specificity= input$spe,
+                    formula = covInput())
+      res4 <- as.matrix(fit4$beta.cov)
+      res4 <- format(res4, nsmall = 4)}, caption = "Beta.cov Table:",
+      caption.placement = getOption("xtable.caption.placement", "top"), 
+      caption.width = getOption("xtable.caption.width", NULL))
+    
+    output$betaui <- renderUI({
+      df <- data()
+      fit4 <- icmis(subject = df[,input$id],
+                    testtime = df[,input$tt],
+                    data = data(),
+                    result = df[,input$res],
+                    sensitivity = input$sen,
+                    specificity= input$spe,
+                    formula = covInput())
+      res4 <- fit4$coefficient
+      if (is.na(res4)){return("There are no beta.cov for your dataset.")}
+      tableOutput("beta")
+    })
+
+    
+    output$n <- renderText({
+      df <- data()
+      fit5 <- icmis(subject = df[,input$id],
+                    testtime = df[,input$tt],
+                    data = data(),
+                    result = df[,input$res],
+                    sensitivity = input$sen,
+                    specificity= input$spe,
+                    formula = covInput())
+      res5 <- fit5$nsub
+      paste("Your Sample Size is: ", res5)
+    })
+    
   }) 
+

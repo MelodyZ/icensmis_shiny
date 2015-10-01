@@ -158,10 +158,41 @@ shinyUI(navbarPage(" ",
                                 fileInput('file1', 'Choose CSV File',
                                           accept=c('text/csv', 
                                                    'text/comma-separated-values,text/plain', 
-                                                   '.csv'))
+                                                   '.csv')),
+                                textInput("sep", "Separator Character:", value = ","),
+                                bsPopover("sep", title = "", content = "If no separator character, leave it blank",
+                                          placement = "right", options = list(container = "body")),
+                                conditionalPanel("output.data",
+                                                 uiOutput("Id"),
+                                                 uiOutput("Tt"),
+                                                 uiOutput("Res"),
+                                                 uiOutput("Cov"),
+                                                 sliderInput("sen", "Sensitivity",
+                                                             min = 0, max = 1, 
+                                                             step = 0.01, value = 0.7),
+                                                 sliderInput("spe", "Specificity",
+                                                             min = 0, max = 1, 
+                                                             step = 0.01, value = 0.98)
+                                                 )
                               ),
                               mainPanel(
-                                tableOutput('contents')
+                                bsCollapse(open = "Review your dataset",
+                                           bsCollapsePanel("Review your dataset", 
+                                                           tableOutput('data'),
+                                                           tags$style(HTML("#data table{ 
+                                                                            margin: auto;
+                                                                           }"))),
+                                           bsCollapsePanel("Results",
+                                                           textOutput("loglik"),
+                                                           br(),
+                                                           uiOutput("coefui"),
+                                                           br(),
+                                                           tableOutput("surv"),
+                                                           br(),
+                                                           uiOutput('betaui'),
+                                                           br(),
+                                                           textOutput("n")
+                                                           ))
                               )
                             )
                    ),
