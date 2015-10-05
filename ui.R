@@ -10,6 +10,7 @@ library(shinyBS)
 
 shinyUI(navbarPage(" ",
                    tabPanel("Study Design",
+                            
                             titlePanel("Study design for time to event outcomes in the presence of error-prone diagnostic tests or self-reports"),
                             br(),
                             br(),
@@ -249,5 +250,14 @@ shinyUI(navbarPage(" ",
                               )
                             )
                    ),
-                   tabPanel("Background")
+                   tabPanel("Background",
+                            mainPanel(
+                              h4("Abstract"),
+                              br(),
+                              "The onset of several silent, chronic diseases such as diabetes can be de- tected only through diagnostic tests. Due to cost considerations, self-reported outcomes are routinely collected in lieu of expensive diagnostic tests in large- scale prospective investigations such as the Women’s Health Initiative. How- ever, self-reported outcomes are subject to imperfect sensitivity and speci- ficity. Using a semiparametric likelihood-based approach, we present time to event models to estimate the association of one or more covariates with a error-prone, self-reported outcome. We present simulation studies to assess the effect of error in self-reported outcomes with regard to bias in the estima- tion of the regression parameter of interest. We apply the proposed methods to prospective data from 152,830 women enrolled in the Women’s Health Initiative to evaluate the effect of statin use with the risk of incident diabetes mellitus among postmenopausal women. The current analysis is based on follow-up through 2010, with a median duration of follow-up of 12.1 years. The methods proposed in this paper are readily implemented using our freely available R software package icensmis, which is available at the Comprehen- sive R Archive Network (CRAN) website.",
+                              br(),
+                              h4("Links"),
+                              br(),
+                              
+                            ))
 ))

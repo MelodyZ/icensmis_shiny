@@ -153,12 +153,12 @@ shinyServer(function(input, output, session) {
       selectInput("cov", "Covariate", vars4, selected = NULL, multiple = T)
     })
     
-    observeEvent(input$upload, ({
-      updateSelectInput(session, "id")
-      updateSelectInput(session, "tt")
-      updateSelectInput(session, "res")
-      updateSelectInput(session, "cov")
-    }))
+    #observeEvent(input$upload, ({
+     # updateSelectInput(session, "id")
+     # updateSelectInput(session, "tt")
+     # updateSelectInput(session, "res")
+     # updateSelectInput(session, "cov")
+    #}))
     
     ## Results
     
