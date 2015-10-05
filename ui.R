@@ -10,8 +10,19 @@ library(shinyBS)
 
 shinyUI(navbarPage(" ",
                    tabPanel("Study Design",
-                            
-                            titlePanel("Study design for time to event outcomes in the presence of error-prone diagnostic tests or self-reports"),
+                            tags$head(
+                              tags$style(HTML("
+                              @import url('//fonts.googleapis.com/css?family=Lobster|Cabin:400,700');
+      
+                              h1 {
+                              font-size: 28px;
+                              font-weight: 500;
+                              line-height: 1.5;
+                              }
+
+                              "))
+                            ),
+                            headerPanel("Study design for time to event outcomes in the presence of error-prone diagnostic tests or self-reports"),
                             br(),
                             br(),
                             # Some custom CSS
@@ -187,7 +198,8 @@ shinyUI(navbarPage(" ",
                                 div(class = "option-group2",
                                     div(class = "option-header", "Data Input"),
                                 #Insert File
-                                fileInput('file1', 'Choose a CSV File',
+                                helpText("Please chose a .csv file"),
+                                fileInput('file1', '',
                                           accept=c('text/csv', 
                                                    'text/comma-separated-values,text/plain', 
                                                    '.csv')),
@@ -254,10 +266,16 @@ shinyUI(navbarPage(" ",
                             mainPanel(
                               h4("Abstract"),
                               br(),
-                              "The onset of several silent, chronic diseases such as diabetes can be de- tected only through diagnostic tests. Due to cost considerations, self-reported outcomes are routinely collected in lieu of expensive diagnostic tests in large- scale prospective investigations such as the Women’s Health Initiative. How- ever, self-reported outcomes are subject to imperfect sensitivity and speci- ficity. Using a semiparametric likelihood-based approach, we present time to event models to estimate the association of one or more covariates with a error-prone, self-reported outcome. We present simulation studies to assess the effect of error in self-reported outcomes with regard to bias in the estima- tion of the regression parameter of interest. We apply the proposed methods to prospective data from 152,830 women enrolled in the Women’s Health Initiative to evaluate the effect of statin use with the risk of incident diabetes mellitus among postmenopausal women. The current analysis is based on follow-up through 2010, with a median duration of follow-up of 12.1 years. The methods proposed in this paper are readily implemented using our freely available R software package icensmis, which is available at the Comprehen- sive R Archive Network (CRAN) website.",
+                              "The onset of several silent, chronic diseases such as diabetes can be de- tected only through diagnostic tests. Due to cost considerations, self-reported outcomes are routinely collected in lieu of expensive diagnostic tests in large- scale prospective investigations such as the Women’s Health Initiative. How- ever, self-reported outcomes are subject to imperfect sensitivity and speci- ficity. Using a semiparametric likelihood-based approach, we present time to event models to estimate the association of one or more covariates with a error-prone, self-reported outcome. We present simulation studies to assess the effect of error in self-reported outcomes with regard to bias in the estima- tion of the regression parameter of interest. We apply the proposed methods to prospective data from 152,830 women enrolled in the Women’s Health Initiative to evaluate the effect of statin use with the risk of incident diabetes mellitus among postmenopausal women. The current analysis is based on follow-up through 2010, with a median duration of follow-up of 12.1 years. The methods proposed in this paper are readily implemented using our freely available R software package icensmis, which is available at the Comprehensive R Archive Network (CRAN) website.",
+                              br(),
                               br(),
                               h4("Links"),
                               br(),
+                              p("[1]", a("SEMIPARAMETRIC TIME TO EVENT MODELS IN THE PRESENCE OF ERROR-PRONE, SELF-REPORTED OUTCOMES—WITH APPLICATION TO THE WOMEN’S HEALTH INITIATIVE1",     
+                                href="http://arxiv.org/pdf/1509.04080.pdf")),
+                              br(),
+                              br(),
+                              h4("Tutorials")
                               
                             ))
 ))
