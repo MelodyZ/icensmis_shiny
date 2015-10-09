@@ -12,76 +12,177 @@ library(icensmis)
 shinyServer(function(input, output, session) {
 
 #------------------------------------------------------------------------------------------------
-    # Calculate Sample Size
-    output$ssize <- renderText({
-      if (input$submt == 0)
-        return()
+  # choose survivals or testtimes
+  survInput <- reactive({
+    if (input$surv_tt == 1){
+      ### chosse survivals
+      as.numeric(strsplit(input$surv, split = ",")[[1]])
+    } else{
+      ### choose testtimes
+      ttime <- sort(as.numeric(strsplit(input$ttime, split = ",")[[1]]))
+      exp(log(0.9) * ttime/max(ttime))
+    }
+  })
+   
+   # Calculate Sample Size
+    output$ssize <- renderTable({
+      if (input$submt == 0){
+        return()}else {
+          m1 <- function(y){
+            ssize <- isolate(icpower(HR = y,
+                             sensitivity = input$sen,
+                             specificity = input$spe,
+                             survivals = survInput(),
+                             rho = input$rho,
+                             pmiss = input$pmis,
+                             design = input$dsn,
+                             negpred = input$negp,
+                             power = input$pw))
+            result_ss <- ssize$result[[1]]
+            return(result_ss)
+          } 
+          
+          hr <- isolate(as.numeric(strsplit(input$HR, split = ",")[[1]]))
+          result_n <- sapply(hr, m1)
+          result_ss_1 <- round(input$rho * result_n)
+          result_ss_2 <- result_n - result_ss_1
+          
+          table_n <- isolate(cbind(hr, result_n, result_ss_1, result_ss_2))
+          colnames(table_n) <- c("HR", "N", "N1", "N2")
+          rownames(table_n) <- 1:length(hr)
+          table_n
+        }
+        
+      #result_ss <- ssize$result[[1]]
+      #result_ss_1 <- ssize$result[[2]]
+      #result_ss_2 <- ssize$result[[3]]
       
-      ssize <- isolate(icpower(HR = input$HR,
-                               sensitivity = input$sen,
-                               specificity = input$spe,
-                               survivals = as.numeric(strsplit(input$surv, split = ",")[[1]]),
-                               rho = input$rho,
-                               pmiss = input$pmis,
-                               design = input$dsn,
-                               negpred = input$negp,
-                               power = input$pw))
-      result_ss <- ssize$result[[1]]
-      result_ss_1 <- ssize$result[[2]]
-      result_ss_2 <- ssize$result[[3]]
+      #paste0("The total Sample Size is:", as.character(result_n), ".", 
+      #      "There are ", as.character(result_ss_1), "subjects in GROUP 1, ",
+       #     "and", as.character(result_ss_2) ,"subjects in GROUP 2.")
       
-      paste("The total Sample Size is:", as.character(result_ss), ".", 
-            "There are ", as.character(result_ss_1), "subjects in GROUP 1, ",
-            "and", as.character(result_ss_2) ,"subjects in GROUP 2.")
-      
-    })
+    }, align = "lllll")
     
     # Calculate Power
-    output$power <- renderText({
-      if (input$submt == 0)
-        return()
-      
-      spower <- isolate(icpower(HR = input$HR,
-                                sensitivity = input$sen,
-                                specificity = input$spe,
-                                survivals = as.numeric(strsplit(input$surv, split = ",")[[1]]),
-                                rho = input$rho,
-                                pmiss = input$pmis,
-                                design = input$dsn,
-                                negpred = input$negp, 
-                                N = input$n))
-      result_p <- spower$result[[4]]
-      
-      paste("Power:", as.character(round(result_p,2)), ".")
-      
-    })
+    output$power <- renderTable({
+      if (input$submt == 0){
+        return()}else {
+      m2 <- function(x, y){
+
+            spower <- isolate(icpower(HR = y,
+                              sensitivity = input$sen,
+                              specificity = input$spe,
+                              survivals = survInput(),
+                              rho = input$rho,
+                              pmiss = input$pmis,
+                              design = input$dsn,
+                              negpred = input$negp,
+                              N = x))
+            result_p <- spower$result[[4]]
+            return(result_p)
+          }
+        
+        ss <- isolate(as.numeric(strsplit(input$n, split = ",")[[1]]))
+        hr <- isolate(as.numeric(strsplit(input$HR, split = ",")[[1]]))
+        ss_hr <- expand.grid(ss, hr)
+        result_pw <- mapply(x = ss_hr[,1], y = ss_hr[,2], m2)
+        #result_p <- m2(ss_hr[,1], ss_hr[,2])
+        table_p <- cbind(ss_hr, result_pw)
+        colnames(table_p) <- c("N", "HR", "Power")
+        rownames(table_p) <- 1:nrow(ss_hr)
+        table_p
+        }
+        
+    }, align = "llll")
     
     output$matrix1 <- renderTable({
-      if (input$submt == 0)
+      if (input$submt == 0){
         return()
-      
-      df <- isolate(as.data.frame(matrix(list(input$pw, input$HR, input$sen, input$spe, input$surv, 
-                    input$rho, input$pmis, input$dsn, input$negp),
-                    nrow = 9)))
-      rownames(df) <- c('Power', 'Hazard Ratio', 'Sensitivity', 'Specivility',
-                       "Survivals", "Rho", "Pmiss", "Design", "Negpred")
-      colnames(df) <- "Values"
-      df
+      }else {
+        ## Choose survivals or ttimes
+        if (input$surv_tt == 1){
+          df <- isolate(as.data.frame(matrix(list(input$pw, input$HR, input$sen, input$spe, input$surv, 
+                                                  input$rho, input$pmis, input$dsn, input$negp),
+                                             nrow = 9)))
+          rownames(df) <- c('Power', 'Hazard Ratio', 'Sensitivity', 'Specivility',
+                            'Survivals', "Rho", "Pmiss", "Design", "Negpred")
+          colnames(df) <- "Values"
+          df}else {
+            df <- isolate(as.data.frame(matrix(list(input$pw, input$HR, input$sen, input$spe, input$ttime, 
+                                                    input$rho, input$pmis, input$dsn, input$negp),
+                                               nrow = 9)))
+            rownames(df) <- c('Power', 'Hazard Ratio', 'Sensitivity', 'Specivility',
+                              'Testtimes', "Rho", "Pmiss", "Design", "Negpred")
+            colnames(df) <- "Values"
+            df
+          }
+        }
     }, align = "ll")
     
     output$matrix2 <- renderTable({
-      if (input$submt == 0)
+      if (input$submt == 0){
         return()
-      
-      df <- isolate(as.data.frame(matrix(list(input$n, input$HR, input$sen, input$spe, input$surv, 
-                                              input$rho, input$pmis, input$dsn, input$negp),
-                                         nrow = 9)))
-      rownames(df) <- c('Sample Size', 'Hazard Ratio', 'Sensitivity', 'Specivility',
-                        "Survivals", "Rho", "Pmiss", "Design", "Negpred")
-      colnames(df) <- "Values"
-      df
+      }else {
+          ### chosse survivals or ttimes
+        if (input$surv_tt == 1){
+          df <- isolate(as.data.frame(matrix(list(input$n, input$HR, input$sen, input$spe, input$surv, 
+                                                  input$rho, input$pmis, input$dsn, input$negp),
+                                             nrow = 9)))
+          rownames(df) <- c('Sample Size', 'Hazard Ratio', 'Sensitivity', 'Specivility',
+                            'Survivals', "Rho", "Pmiss", "Design", "Negpred")
+          colnames(df) <- "Values"
+          df}else {
+            df <- isolate(as.data.frame(matrix(list(input$n, input$HR, input$sen, input$spe, input$ttime, 
+                                                    input$rho, input$pmis, input$dsn, input$negp),
+                                               nrow = 9)))
+            rownames(df) <- c('Sample Size', 'Hazard Ratio', 'Sensitivity', 'Specivility',
+                              'Testtimes', "Rho", "Pmiss", "Design", "Negpred")
+            colnames(df) <- "Values"
+            df
+          }      
+          }
     }, align = "ll")
     
+####################################################################
+    
+    down_matrix1 <- reactive({
+      if (input$submt == 0){
+        return()
+      }else {
+        ## Choose survivals or ttimes
+
+        if (input$surv_tt == 1){
+          hr <- isolate(as.numeric(strsplit(input$HR, split = ",")[[1]]))
+          surv <- isolate(as.numeric(strsplit(input$surv, split = ",")[[1]]))
+          #hr <- c(1.25, 10, 25, 40.5, 55)
+          #surv <- c(0.99, 0.9, 0.88, 0.76, 0.75)
+          df <- isolate(as.data.frame(t(sapply(hr, function(x) {c(input$pw, x, input$sen, input$spe, surv, 
+                                                  input$rho, input$pmis, input$dsn, input$negp)}))))
+          #df <- as.data.frame(t(sapply(hr, function(x) {c(0.9, x, 0.99, 0.55, surv, 0.5, 0, "M", 1)})))
+          colnames(df) <- c('Power', 'Hazard Ratio', 'Sensitivity', 'Specivility',
+                            sapply(order(surv, decreasing = T), function(x){paste0('Survival ', x)}), 
+                            "Rho", "Pmiss", "Design", "Negpred")
+          rownames(df) <- 1:length(hr)
+          df}else {
+            df <- isolate(as.data.frame(matrix(c(input$pw, input$HR, input$sen, input$spe, input$ttime, 
+                                                    input$rho, input$pmis, input$dsn, input$negp), byrow = F,
+                                               nrow = 9)))
+            rownames(df) <- c('Power', 'Hazard Ratio', 'Sensitivity', 'Specivility',
+                              'Testtimes', "Rho", "Pmiss", "Design", "Negpred")
+            colnames(df) <- "Values"
+            df
+          }
+      }
+    })
+    # Download data
+    
+    output$downloadData <- downloadHandler(        #### called from UI
+      filename = function() {paste("Analysis", '.csv', sep='')},
+      content = function(file) {
+        write.csv(down_matrix1(), file)
+      }
+    )
+####################################################################    
     #---------------------------------------------------------------------------------------------------
     
     #Insert File
@@ -296,4 +397,5 @@ shinyServer(function(input, output, session) {
     })
     
   }) 
+
 

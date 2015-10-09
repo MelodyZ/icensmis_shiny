@@ -74,8 +74,8 @@ shinyUI(navbarPage(" ",
                                     br(),
                                     conditionalPanel(
                                       condition = "input.select == 2",
-                                      numericInput("n", "Sample Size:",
-                                                   min = 1, value = 10000),
+                                      textInput("n", "Sample Size:",
+                                                value = "100, 1000, 10000"),
                                       bsPopover("n", "A vector of sample sizes to calculate corresponding powers.",
                                                 "Type in any postive integers, i.e. 25673.",
                                                 "right", options = list(container = "body"))),
@@ -88,8 +88,8 @@ shinyUI(navbarPage(" ",
                                                 "Type in any postive values between 0 and 1, i.e. 0.985.",
                                                 "right", options = list(container = "body"))),
                                     
-                                    numericInput("HR", "Hazard ratio:",
-                                                 step = 0.01, value = 1.25),
+                                    textInput("HR", "Hazard ratio:",
+                                              value = "1.25, 10, 125"),
                                     bsPopover("HR", "<b>Hazard ratio</b> (HR) is the ratio of the hazard rates corresponding to the conditions described by two levels of an explanatory variable.",
                                               "Type in any non-zero positive values, i.e. 10.",
                                               "right", options = list(container = "body")),
@@ -105,11 +105,27 @@ shinyUI(navbarPage(" ",
                                     bsPopover("spe", "Specificity (also called the true negative rate) measures the proportion of negatives that are correctly identified.",
                                               "It ranges from 0 to 1. Move the slider to set a value.",
                                               "right", options = list(container = "body")),
-                                    textInput("surv", "Survival:", 
-                                              value = "0.998, 0.978, 0.898, 0.798"),
-                                    bsPopover("surv", "A vector of survival function at each test time for baseline(reference) group. Its length determines the number of tests.",
-                                              "Type in a decreasing sequence of values between 0 and 1, with a common between each two, i.e. 0.9998, 0.976, 0.903, 0.899, 0.877.",
-                                              "right", options = list(container = "body")),
+                                    selectInput("surv_tt", "Survivals:",
+                                                choices = list("Type in Survivals" = 1,
+                                                               "Type in Test Times" = 2)),
+                                    conditionalPanel(
+                                      condition = "input.surv_tt == 1",
+                                      textInput("surv", "Survivals:", 
+                                                value = "0.998, 0.978, 0.898, 0.798"),
+                                      bsPopover("surv", "A vector of survival function at each test time for baseline(reference) group. Its length determines the number of tests.",
+                                                "Type in a decreasing sequence of values between 0 and 1, with a common between each two, i.e. 0.9998, 0.976, 0.903, 0.899, 0.877.",
+                                                "right", options = list(container = "body"))
+                                      ),
+                                    conditionalPanel(
+                                      condition = "input.surv_tt == 2",
+                                      helpText("We assume survival function follows Exponential Distribution."),
+                                      textInput("ttime", "Test Times:", 
+                                                value = "1, 3, 4, 7, 11, 16, 22"),
+                                      bsPopover("ttime", "variable in data for test time. Assume all test times are non-negative.",
+                                                "Type in a sequence of values, with a common between each two, i.e. 1, 3, 4, 7, 11, 16, 22.",
+                                                "right", options = list(container = "body"))
+                                    ),
+                                    
                                     sliderInput("rho", "Rho:",
                                                 min = 0, max = 1, 
                                                 step = 0.1, value = 0.5),
@@ -136,10 +152,11 @@ shinyUI(navbarPage(" ",
                                               "right", options = list(container = "body"))
                                     ),
                                 br(),
-                                br(),
-                                actionButton("submt", "Submit"),
-                                br(),
-                                helpText('Click the "Submit" to display your result.')
+                                helpText('Click the "Analysis" to display your result.'),
+                                bootstrapPage(
+                                  div(style="display:inline-block",actionButton("submt", "Analysis")),
+                                  div(style="display:inline-block",downloadButton('downloadData','Download Data'))
+                                  )
                               ),
                               mainPanel(
                                 h4("Your Input is:"),
@@ -156,9 +173,15 @@ shinyUI(navbarPage(" ",
                                 hr(),
                                 h4("Your Result is:"),
                                 conditionalPanel(condition = "input.select == 1",
-                                                 textOutput("ssize")),
+                                                 tableOutput("ssize")),
                                 conditionalPanel(condition = "input.select == 2",
-                                                 textOutput("power"))
+                                                 tableOutput("power")),
+                                tags$style(HTML("#ssize table{ 
+                                  margin: auto;
+                                   }")),
+                                tags$style(HTML("#power table{ 
+                                  margin: auto;
+                                   }"))
                                 )
                               )
                             ),
