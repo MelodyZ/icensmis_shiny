@@ -105,7 +105,7 @@ shinyUI(navbarPage(" ",
                                     bsPopover("spe", "Specificity (also called the true negative rate) measures the proportion of negatives that are correctly identified.",
                                               "It ranges from 0 to 1. Move the slider to set a value.",
                                               "right", options = list(container = "body")),
-                                    selectInput("surv_tt", "Survivals:",
+                                    selectInput("surv_tt", "Choose one covariate:",
                                                 choices = list("Type in Survivals" = 1,
                                                                "Type in Test Times" = 2)),
                                     conditionalPanel(
@@ -132,7 +132,7 @@ shinyUI(navbarPage(" ",
                                     bsPopover("rho", "Proportion of subjects in baseline(reference) group.",
                                               "It ranges from 0 to 1. Move the slider to set a value.", 
                                               "right", options = list(container = "body")),
-                                    numericInput("pmis", "Pmiss:",
+                                    sliderInput("pmis", "Pmiss:",
                                                  min = 0, max = 1, 
                                                  step = 0.01, value = 0),
                                     bsPopover("pmis", "A value or a vector (must have same length as survivals) of the probabilities of each test being randomly missing at each test time. If pmiss is a single value, then each test is assumed to have an identical probability of missingness.",
@@ -148,15 +148,20 @@ shinyUI(navbarPage(" ",
                                                  min = 0, max = 1, 
                                                  step = 0.01, value = 1),
                                     bsPopover("negp", "Baseline negative predictive value, i.e. the probability of being truely disease free for those who were tested (reported) as disease free at baseline. If baseline screening test is perfect, then negpred = 1.",
-                                              "It ranges from 0 to 1. Move the slider to set a value.",
+                                              "It ranges from 0 to 1. Please type in a value.",
                                               "right", options = list(container = "body"))
                                     ),
                                 br(),
                                 helpText('Click the "Analysis" to display your result.'),
+                                actionButton("submt", "Analysis"),
+                                br(),
+                                br(),
+                                helpText("If you want to download the results into a csv. file, please type in your file name, and Click 'Download' button."),
                                 bootstrapPage(
-                                  div(style="display:inline-block",actionButton("submt", "Analysis")),
-                                  div(style="display:inline-block",downloadButton('downloadData','Download Data'))
+                                  div(style="display:inline-block", textInput("names", "Dataset Name:", value = "results")),
+                                  div(style="display:inline-block", downloadButton('downloadData','Download'))
                                   )
+                                
                               ),
                               mainPanel(
                                 h4("Your Input is:"),
