@@ -20,7 +20,7 @@ shinyServer(function(input, output, session) {
     } else{
       ### choose testtimes
       ttime <- sort(as.numeric(strsplit(input$ttime, split = ",")[[1]]))
-      exp(log(0.9) * ttime/max(ttime))
+      exp(log(1-input$ci) * ttime/max(ttime))
     }
   })
    
@@ -108,10 +108,10 @@ shinyServer(function(input, output, session) {
                             'Survivals', "Rho", "Pmiss", "Design", "Negpred")
           colnames(df) <- "Values"
           df}else {
-            df <- isolate(as.data.frame(matrix(list(input$pw, input$HR, input$sen, input$spe, input$ttime, 
+            df <- isolate(as.data.frame(matrix(list(input$pw, input$HR, input$sen, input$spe, input$ci, input$ttime, 
                                                     input$rho, input$pmis, input$dsn, input$negp),
-                                               nrow = 9)))
-            rownames(df) <- c('Power', 'Hazard Ratio', 'Sensitivity', 'Specificity',
+                                               nrow = 10)))
+            rownames(df) <- c('Power', 'Hazard Ratio', 'Sensitivity', 'Specificity', 'Cumulative Incidence',
                               'Testtimes', "Rho", "Pmiss", "Design", "Negpred")
             colnames(df) <- "Values"
             df
@@ -132,10 +132,10 @@ shinyServer(function(input, output, session) {
                             'Survivals', "Rho", "Pmiss", "Design", "Negpred")
           colnames(df) <- "Values"
           df}else {
-            df <- isolate(as.data.frame(matrix(list(input$n, input$HR, input$sen, input$spe, input$ttime, 
+            df <- isolate(as.data.frame(matrix(list(input$n, input$HR, input$sen, input$spe, input$ci, input$ttime, 
                                                     input$rho, input$pmis, input$dsn, input$negp),
-                                               nrow = 9)))
-            rownames(df) <- c('Sample Size', 'Hazard Ratio', 'Sensitivity', 'Specificity',
+                                               nrow = 10)))
+            rownames(df) <- c('Sample Size', 'Hazard Ratio', 'Sensitivity', 'Specificity', 'Cumulative Incidence',
                               'Testtimes', "Rho", "Pmiss", "Design", "Negpred")
             colnames(df) <- "Values"
             df
@@ -143,7 +143,7 @@ shinyServer(function(input, output, session) {
           }
     }, align = "ll")
     
-####################################################################
+#######################Download#####################################
     
     # Calculate Sample Size
     down_matrix1 <- reactive({
@@ -167,13 +167,13 @@ shinyServer(function(input, output, session) {
           #df
           }else {
             ttime <- isolate(sort(as.numeric(strsplit(input$ttime, split = ",")[[1]])))
-            surv <- exp(log(0.9) * ttime/max(ttime))
+            surv <- exp(log(1-input$ci) * ttime/max(ttime))
             #hr <- c(1.25, 10, 25, 40.5, 55)
             #surv <- c(0.99, 0.9, 0.88, 0.76, 0.75)
-            df <- isolate(as.data.frame(t(sapply(hr, function(x) {c(input$pw, x, input$sen, input$spe, ttime, 
+            df <- isolate(as.data.frame(t(sapply(hr, function(x) {c(input$pw, x, input$sen, input$spe, input$ci, ttime, 
                                                                     input$rho, input$pmis, input$dsn, input$negp)}))))
-            #df <- as.data.frame(t(sapply(hr, function(x) {c(0.9, x, 0.99, 0.55, surv, 0.5, 0, "M", 1)})))
-            colnames(df) <- c('Power', 'Hazard Ratio', 'Sensitivity', 'Specificity',
+            #df <- as.data.frame(t(sapply(hr, function(x) {c(0.9, x, 0.99, 0.55, 0.1, ttime, 0.5, 0, "M", 1)})))
+            colnames(df) <- c('Power', 'Hazard Ratio', 'Sensitivity', 'Specificity', 'Cumulative Incidence',
                               sapply(order(ttime), function(x){paste0('Testtime ', x)}), 
                               "Rho", "Pmiss", "Design", "Negpred")
             rownames(df) <- 1:length(hr)
@@ -233,12 +233,14 @@ shinyServer(function(input, output, session) {
           #df
           }else {
             ttime <- isolate(sort(as.numeric(strsplit(input$ttime, split = ",")[[1]])))
-            surv <- exp(log(0.9) * ttime/max(ttime))
+            #ttime <- c(2, 4, 8, 12)
+            #surv <- exp(log(1-0.1) * ttime/max(ttime))
+            surv <- exp(log(1-input$ci) * ttime/max(ttime))
             
-            df <- isolate(as.data.frame(t(mapply(x = ss_hr[,1], y = ss_hr[,2], function(x, y) {c( x, y, input$sen, input$spe, ttime, 
+            df <- isolate(as.data.frame(t(mapply(x = ss_hr[,1], y = ss_hr[,2], function(x, y) {c( x, y, input$sen, input$spe, input$ci, ttime, 
                                                                                                   input$rho, input$pmis, input$dsn, input$negp)}))))
-            #df <- as.data.frame(t(mapply(x = ss_hr[,1], y = ss_hr[,2], function(x, y) {c(x, y, 0.99, 0.55, surv, 0.5, 0, "M", 1)})))
-            colnames(df) <- c('Sample Size', 'Hazard Ratio', 'Sensitivity', 'Specificity',
+            #df <- as.data.frame(t(mapply(x = ss_hr[,1], y = ss_hr[,2], function(x, y) {c(x, y, 0.99, 0.55, 0.1, ttime, 0.5, 0, "M", 1)})))
+            colnames(df) <- c('Sample Size', 'Hazard Ratio', 'Sensitivity', 'Specificity', 'Cumulative Incidence',
                               sapply(order(ttime), function(x){paste0('Testtime ', x)}), 
                               "Rho", "Pmiss", "Design", "Negpred")
             rownames(df) <- 1:nrow(ss_hr)

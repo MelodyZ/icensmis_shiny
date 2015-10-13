@@ -105,9 +105,9 @@ shinyUI(navbarPage(" ",
                                     bsPopover("spe", "Specificity (also called the true negative rate) measures the proportion of negatives that are correctly identified.",
                                               "It ranges from 0 to 1. Move the slider to set a value.",
                                               "right", options = list(container = "body")),
-                                    selectInput("surv_tt", "Choose one covariate:",
+                                    selectInput("surv_tt", "Choose covariates:",
                                                 choices = list("Type in Survivals" = 1,
-                                                               "Type in Test Times" = 2)),
+                                                               "Type in Cumulative Incidence and Test Times" = 2)),
                                     conditionalPanel(
                                       condition = "input.surv_tt == 1",
                                       textInput("surv", "Survivals:", 
@@ -119,6 +119,12 @@ shinyUI(navbarPage(" ",
                                     conditionalPanel(
                                       condition = "input.surv_tt == 2",
                                       helpText("We assume survival function follows Exponential Distribution."),
+                                      sliderInput("ci", "Cumulative Incidence", 
+                                                  min = 0, max = 1, 
+                                                  step = 0.01, value = 0.1),
+                                      bsPopover("ci", "Probability that a particular event, such as occurrence of a particular disease, has occurred before a given time.",
+                                                "It ranges from 0 to 1. Move the slider to set a value.",
+                                                "right", options = list(container = "body")),
                                       textInput("ttime", "Test Times:", 
                                                 value = "1, 3, 4, 7, 11, 16, 22"),
                                       bsPopover("ttime", "variable in data for test time. Assume all test times are non-negative.",
@@ -152,16 +158,15 @@ shinyUI(navbarPage(" ",
                                               "right", options = list(container = "body"))
                                     ),
                                 br(),
-                                helpText('Click the "Analysis" to display your result.'),
                                 actionButton("submt", "Analysis"),
+                                helpText('Click the "Analysis" to display your result.'),
                                 br(),
                                 br(),
-                                helpText("If you want to download the results into a csv. file, please type in your file name, and Click 'Download' button."),
                                 bootstrapPage(
                                   div(style="display:inline-block", textInput("names", "Dataset Name:", value = "results")),
                                   div(style="display:inline-block", downloadButton('downloadData','Download'))
-                                  )
-                                
+                                  ),
+                                helpText("If you want to download the results into a csv. file, please type in your file name, and Click 'Download' button.")
                               ),
                               mainPanel(
                                 h4("Your Input is:"),
