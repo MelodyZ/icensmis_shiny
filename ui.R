@@ -308,7 +308,10 @@ shinyUI(navbarPage(" ",
                                 href="http://arxiv.org/pdf/1509.04080.pdf")),
                               br(),
                               br(),
-                              h4("Tutorials")
+                              h4("Tutorials"),
+                              br(),
+                              p("[1]", a("Sample Size Estimation while Controlling Covariates Using the R Package icensmis",     
+                                         target="/Users/Melody/Google Drive/icensmis_shiny/www", href="tutorial.html"))
                               
                             ))
 ))
